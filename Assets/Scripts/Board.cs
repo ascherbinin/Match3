@@ -16,13 +16,11 @@ public class Board : MonoBehaviour
 
     private int[,] BoardGrid;
 
-    private bool _oneShow = false;
-
     public float SwapSpeed;
 
-    private Color _blockColor;
+    private Color _blockColor = Color.white;
 
-    private bool _swapEffect;
+    private bool _swapEffect = false;
 
     [SerializeField]
     private List<Block> blockList = new List<Block>();
@@ -35,24 +33,29 @@ public class Board : MonoBehaviour
 
     void Start()
     {
+
         GenBoard();
     }
 
     // Update is called once per frame
     void Update()
     {
+         
+
         if(Block.Select)
         {
             if(_blockColor == Color.white)
             {
                 _blockColor = Block.Select.gameObject.GetComponent<Renderer>().material.color;
+                
             }
             Block.Select.gameObject.GetComponent<Renderer>().material.color = Color32.Lerp(_blockColor,Color.black,Mathf.PingPong(Time.time,0.5f));
+            
         }
 
         if (Block.Select && Block.MoveTo)
         {
-            if (CheckIfNear())
+            if (CheckIfNear()==true)
             {
                 if(!_swapEffect)
                 {
@@ -89,26 +92,26 @@ public class Board : MonoBehaviour
         Block selectBlock = Block.Select.gameObject.GetComponent<Block>();
         Block moveToBlock = Block.MoveTo.gameObject.GetComponent<Block>();
 
-        Debug.Log("CheckIfNear вызван");
+        //Debug.Log("CheckIfNear вызван");
         if (selectBlock.X - 1 == moveToBlock.X && selectBlock.Y == moveToBlock.Y)
         {
-            Debug.Log("Блок слева");
+            //Debug.Log("Блок слева");
             return true;
         }
         if (selectBlock.X + 1 == moveToBlock.X && selectBlock.Y == moveToBlock.Y)
         {
-            Debug.Log("Блок справа");
+            //Debug.Log("Блок справа");
             return true;
         }
         if (selectBlock.X == moveToBlock.X && selectBlock.Y - 1 == moveToBlock.Y)
         {
-            Debug.Log("Блок внизу");
+            //Debug.Log("Блок внизу");
             return true;
         }
 
         if (selectBlock.X == moveToBlock.X && selectBlock.Y + 1 == moveToBlock.Y)
         {
-            Debug.Log("Блок сверху");
+            //Debug.Log("Блок сверху");
             return true;
         }
         Debug.Log("Функция CheckifNear не вернула TRUE");
@@ -143,13 +146,23 @@ public class Board : MonoBehaviour
     
     void AddNewBlock(int xPos, int yPos)
     {
-        int randomBlock = Random.Range(0, BlockArray.Length);
-        Transform block = Instantiate(BlockArray[randomBlock], new Vector3(xPos * 1.95f, yPos * 1.95f, 0f), Quaternion.identity) as Transform;
+        int randomBlockType;
+        do{
+        randomBlockType = Random.Range(0, BlockArray.Length);
+        }
+        while((xPos >=2
+            && BoardGrid[xPos - 1, yPos] == randomBlockType
+            && BoardGrid[xPos - 2, yPos] == randomBlockType)
+        ||
+        (yPos >=2
+            && BoardGrid[xPos, yPos - 1] == randomBlockType
+            && BoardGrid[xPos, yPos - 2] == randomBlockType));
+        Transform block = Instantiate(BlockArray[randomBlockType], new Vector3(xPos * 1.95f, yPos * 1.95f, 0f), Quaternion.identity) as Transform;
         block.transform.parent = gameObject.transform;
-        block.name = "Block[X:" + xPos + " Y:" + yPos + "] Type:" + randomBlock;
+        block.name = "Block[X:" + xPos + " Y:" + yPos + "] Type:" + randomBlockType;
 
         Block b = block.gameObject.AddComponent<Block>();
-        b.TypeID = randomBlock;
+        b.TypeID = randomBlockType;
         b.X = xPos;
         b.Y = yPos;
         BoardGrid[xPos, yPos] = b.TypeID;
@@ -199,14 +212,14 @@ public class Board : MonoBehaviour
     //    }
     //    return matchList;
     //}
-    
 
-    //ArrayList GetMatchHoriz(int col, int row )
+
+    //ArrayList GetMatchHoriz(int col, int row)
     //{
-    //    var matchList = new ArrayList(BoardGrid[col,row]);
-    //    for (int i = 1; col+i < BoardWidth; i++)
+    //    var matchList = new ArrayList(BoardGrid[col, row]);
+    //    for (int i = 1; col + i < BoardWidth; i++)
     //    {
-    //        if(BoardGrid[col,row] == BoardGrid[col+i,row])
+    //        if (BoardGrid[col, row] == BoardGrid[col + i, row])
     //        {
     //            matchList.Add(BoardGrid[col + i, row]);
     //        }
@@ -223,9 +236,9 @@ public class Board : MonoBehaviour
     //    var matchList = new ArrayList(BoardGrid[col, row]);
     //    for (int i = 1; row + i < BoardHeight; i++)
     //    {
-    //        if (BoardGrid[col, row] == BoardGrid[col , row+i])
+    //        if (BoardGrid[col, row] == BoardGrid[col, row + i])
     //        {
-    //            matchList.Add(BoardGrid[col , row+i]);
+    //            matchList.Add(BoardGrid[col, row + i]);
     //        }
     //        else
     //        {
@@ -233,6 +246,32 @@ public class Board : MonoBehaviour
     //        }
     //    }
     //    return matchList;
+    //}
+
+    //ArrayList DetectHorizontalMatches()
+    //{
+    //    ArrayList set = new ArrayList();
+    //    for (int row = 0; row < BoardHeight; row++)
+    //    {
+    //        for (int column = 0; column < BoardWidth-2; )
+    //        {
+    //            if(BoardGrid[column,row] != 404)
+    //            {
+    //                int matchType = BoardGrid[column, row];
+
+    //                if(BoardGrid[column+1,row] == matchType &&
+    //                BoardGrid[column+2,row] == matchType)
+    //                {
+    //                    BlockChain chain = new BlockChain();
+    //                    do
+    //                    {
+                            
+    //                    }
+
+    //                }
+    //            }
+    //        }
+    //    }
     //}
 
 
@@ -495,7 +534,7 @@ public class Board : MonoBehaviour
 
     public void Restart()
     {
-        Block[] allb = FindObjectsOfType(typeof(Block)) as Block[];
+        
         foreach (var b in blockList)
         {
             GameObject.Destroy(b);
