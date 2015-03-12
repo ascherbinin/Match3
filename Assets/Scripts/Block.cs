@@ -4,19 +4,22 @@ using System.Collections;
 namespace BlockNS
 {
 
+    
 
 public class Block : MonoBehaviour {
 
-    public int TypeID;
+    public int BlockType;
 
-	public int X;
-	public int Y;
+	public int Column;
+	public int Row;
 
 	public static Transform Select;
 	public static Transform MoveTo;
 
 	private Vector2 _myScale;
     private Color _blockColor;
+
+
 
 	// Use this for initialization
 	void Start () {
@@ -36,7 +39,7 @@ public class Block : MonoBehaviour {
 
 			if(Input.GetButtonDown("Fire1"))
 		{
-		    Debug.Log (string.Format("Выбран блок: {0}:{1} - {2} [{3}-{4}]",X,Y,TypeID,transform.position.x,transform.position.y));
+		    Debug.Log (string.Format("Выбран блок: {0}:{1} - {2} [{3}-{4}]",Column,Row,BlockType,transform.position.x,transform.position.y));
 			if(!Select)
 			{
 				Select = transform;
