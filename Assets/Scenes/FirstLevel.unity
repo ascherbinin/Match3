@@ -272,7 +272,7 @@ MonoBehaviour:
   - {fileID: 448934, guid: 7f3d9678cbc2135479ec8eecfed6d08e, type: 2}
   NumColumns: 9
   NumRows: 9
-  SwapSpeed: .75
+  SwapSpeed: 1
   blockList: []
 --- !u!4 &1253830244
 Transform:

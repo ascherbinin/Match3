@@ -13,24 +13,41 @@ public class Block : MonoBehaviour {
 	public int Column;
 	public int Row;
 
+    private float _startTime;
+
 	public static Transform Select;
 	public static Transform MoveTo;
 
 	private Vector2 _myScale;
-    private Color _blockColor;
+    
 
-
+    public bool NeedFall;
+    public bool ReadyToMove;
 
 	// Use this for initialization
 	void Start () {
 		_myScale = transform.localScale;
-        _blockColor = this.gameObject.GetComponent<Renderer>().material.color;
-        StartCoroutine(RespawnBlock());
+        _startTime = Time.time;
+       if(NeedFall)
+       {
+           StartCoroutine("FallDown");
+       }
+        
 	}
 	
 	// Update is called once per frame
 	void Update () {
-	
+	if(!NeedFall && Time.time - _startTime<3)
+    {
+        if(!NeedFall)
+        {
+            transform.localScale = Vector2.Lerp(Vector2.zero, _myScale, (Time.time - _startTime));
+        }
+        if(NeedFall)
+        {
+            transform.localScale = Vector2.Lerp(Vector2.zero, _myScale, (Time.time - _startTime) * 5);
+        }
+    }
 	}
 
 	void OnMouseOver()
@@ -67,8 +84,6 @@ public class Block : MonoBehaviour {
         {
             time += Time.deltaTime;
             transform.localScale = Vector3.Lerp(lastScaleSize, Vector3.zero, time);
-            //transform.localPosition = Vector3.Lerp(lastPosition, new Vector3(lastPosition.x,lastPosition.y-1f,lastPosition.z), time);
-            transform.gameObject.GetComponent<Renderer>().material.color = Color32.Lerp(_blockColor, new Color32(0, 0, 0, 0), time);
             yield return null;
         }
 
@@ -90,6 +105,37 @@ public class Block : MonoBehaviour {
             yield return null;
         }
 
+
+    }
+
+    public IEnumerator MoveDown(int rows)
+    {
+        Vector3 lastPos = transform.position;
+        Vector3 newPos = new Vector3(transform.position.x, transform.position.y - rows*1.95f, transform.position.z);
+        float time = 0;
+
+        while(time<1)
+        {
+            time += Time.deltaTime;
+            transform.position = Vector3.Lerp(lastPos, newPos, time);
+            yield return null;
+        }
+    }
+
+    public IEnumerator FallDown()
+    {
+        
+        Vector3 newPos = transform.position;
+        Vector3 lastPos = new Vector3(transform.position.x, transform.position.y + 15f,transform.position.z);
+
+        float time = 0;
+
+        while(time<1)
+        {
+            time += Time.deltaTime;
+            transform.position = Vector3.Lerp(lastPos, newPos, time);
+            yield return null;
+        }
 
     }
 }

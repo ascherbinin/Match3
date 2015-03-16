@@ -21,6 +21,7 @@ public class Board : MonoBehaviour
     private Color _blockColor = Color.white;
 
     private bool _canSwap = true;
+    private bool _needCheckMacthPossible = false;
 
     [SerializeField]
     private List<Block> blockList = new List<Block>();
@@ -58,7 +59,7 @@ public class Board : MonoBehaviour
                       (row >= 2
                         && BoardGrid[column, row - 1].BlockType == randomBlockType
                         && BoardGrid[column, row - 2].BlockType == randomBlockType));
-                
+
                 Block b = CreateBlockAtColumn(column, row, randomBlockType);
                 set.Add(b);
             }
@@ -76,7 +77,11 @@ public class Board : MonoBehaviour
         b.BlockType = blockType;
         b.Column = column;
         b.Row = row;
+
+        b.NeedFall = true;
+
         BoardGrid[column, row] = b;
+
         return b;
     }
 
@@ -85,7 +90,7 @@ public class Board : MonoBehaviour
         CreateInitialBlock();
     }
 
-   
+
     void Awake()
     {
         BoardGrid = new Block[NumColumns, NumRows];
@@ -94,7 +99,7 @@ public class Board : MonoBehaviour
     void Start()
     {
         GenerateBoard();
-       
+
     }
 
     // Update is called once per frame
@@ -119,19 +124,22 @@ public class Board : MonoBehaviour
                 if (_canSwap)
                 {
                     _canSwap = false;
-                    StartCoroutine(Swap());
-                    Block.Select = null;
-                    Block.MoveTo = null;
+                    StartCoroutine(SwapBlockEffect(true));
+
                 }
+
             }
             else
             {
+
                 Block.Select.gameObject.GetComponent<Renderer>().material.color = _blockColor;
                 _blockColor = Color.white;
                 Block.Select = null;
                 Block.MoveTo = null;
             }
+
         }
+
 
     }
 
@@ -167,44 +175,42 @@ public class Board : MonoBehaviour
         return false;
     }
 
-    IEnumerator Swap()
-    {
-        Block sel = Block.Select.gameObject.GetComponent<Block>();
-        Block mov = Block.MoveTo.gameObject.GetComponent<Block>();
+    //IEnumerator Swap()
+    //{
+    //    Block sel = Block.Select.gameObject.GetComponent<Block>();
+    //    Block mov = Block.MoveTo.gameObject.GetComponent<Block>();
 
-        Vector3 selTempPos = sel.transform.position;
-        Vector3 movTempPos = mov.transform.position;
-
-
-
-        int columnSelect = sel.Column;
-        int rowSelect = sel.Row;
-        int columnMove = mov.Column;
-        int rowMove = mov.Row;
-
-        BoardGrid[columnSelect, rowSelect] = mov;
-        mov.Column = columnSelect;
-        mov.Row = rowSelect;
-
-        BoardGrid[columnMove, rowMove] = sel;
-        sel.Column = columnMove;
-        sel.Row = rowMove;
-
-        float time = 0;
-
-        while (time < 1)
-        {
-            time += Time.deltaTime * SwapSpeed;
-            sel.transform.position = Vector3.Lerp(selTempPos, movTempPos, time);
-            mov.transform.position = Vector3.Lerp(movTempPos, selTempPos, time);
-            yield return null;
-        }
-
-        _canSwap = true;
-
-    }
+    //    Vector3 selTempPos = sel.transform.position;
+    //    Vector3 movTempPos = mov.transform.position;
 
 
+
+    //    int columnSelect = sel.Column;
+    //    int rowSelect = sel.Row;
+    //    int columnMove = mov.Column;
+    //    int rowMove = mov.Row;
+
+    //    BoardGrid[columnSelect, rowSelect] = mov;
+    //    mov.Column = columnSelect;
+    //    mov.Row = rowSelect;
+
+    //    BoardGrid[columnMove, rowMove] = sel;
+    //    sel.Column = columnMove;
+    //    sel.Row = rowMove;
+
+    //    float time = 0;
+
+    //    while (time < 1)
+    //    {
+    //        time += Time.deltaTime * SwapSpeed;
+    //        sel.transform.position = Vector3.Lerp(selTempPos, movTempPos, time);
+    //        mov.transform.position = Vector3.Lerp(movTempPos, selTempPos, time);
+    //        yield return null;
+    //    }
+
+    //    _canSwap = true;
+
+    //}
 
 
     List<BlockChain> DetectHorizontalMatches()
@@ -279,10 +285,56 @@ public class Board : MonoBehaviour
         return set;
     }
 
-    List<BlockChain> PossibleRemoveMatches()
+    //List<BlockChain> PossibleRemoveMatches()
+    //{
+    //    List<BlockChain> horizontalChains = DetectHorizontalMatches();
+    //    List<BlockChain> verticalChains = DetectVerticalMatches();
+
+    //    List<BlockChain> ResultChains = new List<BlockChain>(horizontalChains);
+    //    ResultChains.AddRange(verticalChains);
+
+    //    return ResultChains;
+    //}
+
+    void MarkToRemoveBlocks(List<BlockChain> chains)
+    {
+
+        foreach (var chain in chains)
+        {
+
+            foreach (Block block in chain.Blocks())
+            {
+                BoardGrid[block.Column, block.Row].BlockType = 404;
+
+            }
+
+
+        }
+
+
+    }
+
+    bool CheckRemoveMatches()
+    {
+        List<BlockChain> chainsArray = RemoveMatches();
+
+        if(chainsArray.Count >0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    List<BlockChain> RemoveMatches()
     {
         List<BlockChain> horizontalChains = DetectHorizontalMatches();
         List<BlockChain> verticalChains = DetectVerticalMatches();
+
+        MarkToRemoveBlocks(horizontalChains);
+        MarkToRemoveBlocks(verticalChains);
 
         List<BlockChain> ResultChains = new List<BlockChain>(horizontalChains);
         ResultChains.AddRange(verticalChains);
@@ -290,287 +342,27 @@ public class Board : MonoBehaviour
         return ResultChains;
     }
 
-    //bool RemoveBlocks(List<BlockChain> chains)
-    //{
-    //    if (chains.Count > 0)
-    //    {
-    //        foreach (var chain in chains)
-    //        {
-
-    //            foreach (Block block in chain.Blocks())
-    //            {
-    //                BoardGrid[block.Column, block.Row].BlockType = 404;
-
-    //            }
-
-
-    //        }
-    //        Respawn();
-    //        return true;
-    //    }
-    //    else
-    //    {
-    //        return false;
-    //    }
-    //}
-
-    //bool CheckMatch()
-    //{
-    //    //Get all blocks in scene
-    //    Block[] allb = FindObjectsOfType(typeof(Block)) as Block[];
-    //    Block sel = Block.Select.gameObject.GetComponent<Block>();
-    //    Block mov = Block.MoveTo.gameObject.GetComponent<Block>();
-
-    //    int countSU = 0; //Count Up
-    //    int countSD = 0; //Count Down
-    //    int countSL = 0; //Count Left
-    //    int countSR = 0; //Count RIght
-
-    //    //Left
-    //    for (int l = sel.X - 1; l >= 0; l--)
-    //    {
-    //        if (BoardGrid[l, sel.Y] == sel.TypeID)
-    //        {//If block have same ID
-    //            countSL++;
-    //        }
-    //        if (BoardGrid[l, sel.Y] != sel.TypeID)
-    //        {//If block doesn't have same ID
-    //            //Stop
-    //            break;
-    //        }
-    //    }
-    //    //Right
-    //    for (int r = sel.X; r < BoardWidth; r++)
-    //    {
-    //        if (BoardGrid[r, sel.Y] == sel.TypeID)
-    //        {
-    //            countSR++;
-    //        }
-    //        if (BoardGrid[r, sel.Y] != sel.TypeID)
-    //        {
-    //            break;
-    //        }
-    //    }
-    //    //Down
-    //    for (int d = sel.Y - 1; d >= 0; d--)
-    //    {
-    //        if (BoardGrid[sel.X, d] == sel.TypeID)
-    //        {
-    //            countSD++;
-    //        }
-    //        if (BoardGrid[sel.X, d] != sel.TypeID)
-    //        {
-    //            break;
-    //        }
-    //    }
-
-    //    //Up
-    //    for (int u = sel.Y; u < BoardHeight; u++)
-    //    {
-    //        if (BoardGrid[sel.X, u] == sel.TypeID)
-    //        {
-    //            countSU++;
-    //        }
-
-    //        if (BoardGrid[sel.X, u] != sel.TypeID)
-    //        {
-    //            break;
-    //        }
-    //    }
-
-    //    int countMU = 0; //Count Up
-    //    int countMD = 0; //Count Down
-    //    int countML = 0; //Count Left
-    //    int countMR = 0; //Count RIght
-
-    //    //Left
-    //    for (int l = mov.X - 1; l >= 0; l--)
-    //    {
-    //        if (BoardGrid[l, mov.Y] == mov.TypeID)
-    //        {//If block have same ID
-    //            countML++;
-    //        }
-    //        if (BoardGrid[l, mov.Y] != mov.TypeID)
-    //        {//If block doesn't have same ID
-    //            //Stop
-    //            break;
-    //        }
-    //    }
-    //    //Right
-    //    for (int r = mov.X; r < BoardWidth; r++)
-    //    {
-    //        if (BoardGrid[r, mov.Y] == mov.TypeID)
-    //        {
-    //            countMR++;
-    //        }
-    //        if (BoardGrid[r, mov.Y] != mov.TypeID)
-    //        {
-    //            break;
-    //        }
-    //    }
-    //    //Down
-    //    for (int d = mov.Y - 1; d >= 0; d--)
-    //    {
-    //        if (BoardGrid[mov.X, d] == mov.TypeID)
-    //        {
-    //            countMD++;
-    //        }
-    //        if (BoardGrid[mov.X, d] != mov.TypeID)
-    //        {
-    //            break;
-    //        }
-    //    }
-
-    //    //Up
-    //    for (int u = mov.Y; u < BoardHeight; u++)
-    //    {
-    //        if (BoardGrid[mov.X, u] == mov.TypeID)
-    //        {
-    //            countMU++;
-    //        }
-
-    //        if (BoardGrid[mov.X, u] != mov.TypeID)
-    //        {
-    //            break;
-    //        }
-    //    }
-
-
-    //    //Проверка цепочек у выбранного блока
-    //    if (countML + countMR >= 3 || countMU + countMD >= 3 || countSL + countSR >= 3 || countSD + countSU >= 3)
-    //    {
-    //        if (countSL + countSR >= 3)
-    //        {
-    //            //Destroy and mark empty block
-    //            for (int cl = 0; cl <= countSL; cl++)
-    //            {
-    //                foreach (Block b in allb)
-    //                {
-    //                    if (b.X == sel.X - cl && b.Y == sel.Y)
-    //                    {
-    //                        b.StartCoroutine("DestroyBlock");
-    //                        BoardGrid[b.X, b.Y] = 404; ; //To mark empty block
-    //                    }
-    //                }
-    //            }
-    //            for (int cr = 0; cr < countSR; cr++)
-    //            {
-    //                foreach (Block b in allb)
-    //                {
-    //                    if (b.X == sel.X + cr && b.Y == sel.Y)
-    //                    {
-    //                        b.StartCoroutine("DestroyBlock");
-    //                        BoardGrid[b.X, b.Y] = 404; ;
-    //                    }
-    //                }
-    //            }
-    //        }
-    //        if (countSD + countSU >= 3)
-    //        {
-    //            for (int cd = 0; cd <= countSD; cd++)
-    //            {
-    //                foreach (Block b in allb)
-    //                {
-    //                    if (b.X == sel.X && b.Y == sel.Y - cd)
-    //                    {
-    //                        BoardGrid[b.X, b.Y] = 404; ;
-    //                        b.StartCoroutine("DestroyBlock");
-    //                    }
-    //                }
-    //            }
-    //            for (int cu = 0; cu < countSU; cu++)
-    //            {
-    //                foreach (Block blc in allb)
-    //                {
-    //                    if (blc.X == sel.X && blc.Y == sel.Y + cu)
-    //                    {
-    //                        BoardGrid[blc.X, blc.Y] = 404; ;
-    //                        blc.StartCoroutine("DestroyBlock");
-    //                    }
-    //                }
-    //            }
-    //        }
-
-    //        if (countML + countMR >= 3)
-    //        {
-    //            //Destroy and mark empty block
-    //            for (int cl = 0; cl <= countML; cl++)
-    //            {
-    //                foreach (Block b in allb)
-    //                {
-    //                    if (b.X == mov.X - cl && b.Y == mov.Y)
-    //                    {
-    //                        BoardGrid[b.X, b.Y] = 404; //To mark empty block
-    //                        b.StartCoroutine("DestroyBlock");
-    //                    }
-    //                }
-    //            }
-    //            for (int cr = 0; cr < countMR; cr++)
-    //            {
-    //                foreach (Block b in allb)
-    //                {
-    //                    if (b.X == mov.X + cr && b.Y == mov.Y)
-    //                    {
-
-    //                        BoardGrid[b.X, b.Y] = 404; //To mark empty block
-    //                        b.StartCoroutine("DestroyBlock");
-    //                    }
-    //                }
-    //            }
-    //        }
-
-    //        if (countMU + countMD >= 3)
-    //        {
-    //            for (int cd = 0; cd < countMD; cd++)
-    //            {
-    //                foreach (Block blc in allb)
-    //                {
-    //                    if (blc.X == mov.X && blc.Y == mov.Y - cd)
-    //                    {
-    //                        BoardGrid[blc.X, blc.Y] = 404;
-    //                        blc.StartCoroutine("DestroyBlock");
-    //                    }
-    //                }
-    //            }
-
-    //            for (int cu = 0; cu < countMU; cu++)
-    //            {
-    //                foreach (Block blc in allb)
-    //                {
-    //                    if (blc.X == mov.X && blc.Y == mov.Y + cu)
-    //                    {
-    //                        BoardGrid[blc.X, blc.Y] = 404;
-    //                        blc.StartCoroutine("DestroyBlock");
-    //                    }
-    //                }
-    //            }
-    //        }
-    //        Respawn();
-    //        return true;
-
-    //    }
-    //    return false;
-    //}
 
 
 
+    void Respawn()
+    {
+        for (int x = 0; x < NumColumns; x++)
+        {
+            for (int y = 0; y < NumRows; y++)
+            {
+                if (BoardGrid[x, y].BlockType == 404)
+                { //Spawn it only on destroyed block
+                    BoardGrid[x, y].StartCoroutine("DestroyBlock");
+                    CreateBlockAtColumn(x, y, Random.Range(0, BlockArray.Length - 1));
 
-    //void Respawn()
-    //{
-    //    for (int x = 0; x < NumColumns; x++)
-    //    {
-    //        for (int y = 0; y < NumRows; y++)
-    //        {
-    //            if (BoardGrid[x, y].BlockType == 404)
-    //            { //Spawn it only on destroyed block
-    //                BoardGrid[x,y].StartCoroutine("DestroyBlock");
-    //                AddNewBlock(x, y);
-    //                RemoveBlocks(PossibleRemoveMatches());
 
-    //            }
-    //        }
-    //    }
-    //}
+                }
+            }
+        }
+    }
+
+
 
     //public void Restart()
     //{
@@ -646,35 +438,87 @@ public class Board : MonoBehaviour
             yield return null;
         }
 
-        ////Do we want to run the code to check for match?
-        //if (match == true)
-        //{
-        //    //Check for match3
-        //    if (RemoveBlocks(PossibleRemoveMatches()) == true)
-        //    {
+        //Do we want to run the code to check for match?
+        if (match == true)
+        {
+            //Check for match3
+            if (CheckRemoveMatches())
+            {
 
-        //        //There is match
-        //        _swapEffect = false;//End effect
-        //        Block.Select.gameObject.GetComponent<Renderer>().material.color = _blockColor;
-        //        _blockColor = Color.white;
-        //        Block.Select = null;
-        //        Block.MoveTo = null;
-        //    }
-        //    else
-        //    {
-        //        //There is no match, return them in their default position
-        //        StartCoroutine(SwapBlockEffect(false));//Swap their position and data using new swap effect, without checking for match3
-        //        Block.Select.gameObject.GetComponent<Renderer>().material.color = _blockColor;
-        //        _blockColor = Color.white;
-        //        Block.Select = null;
-        //        Block.MoveTo = null;
-        //    }
-        //}
-        //else
-        //{//We don't
-        //    _swapEffect = false; //End effect
-        //}
+                //There is match
+                _canSwap = true;
+                Block.Select.gameObject.GetComponent<Renderer>().material.color = _blockColor;
+                _blockColor = Color.white;
+                Block.Select = null;
+                Block.MoveTo = null;
+                Respawn();
+            }
+            else
+            {
+                //There is no match, return them in their default position
+                StartCoroutine(SwapBlockEffect(false));//Swap their position and data using new swap effect, without checking for match3
+                Block.Select.gameObject.GetComponent<Renderer>().material.color = _blockColor;
+                _blockColor = Color.white;
+                Block.Select = null;
+                Block.MoveTo = null;
+            }
+        }
+        else
+        {//We don't
+            _canSwap = true; //End effect
+        }
 
     }
+
+    //void MarkEmpty(int x, int num)
+    //{
+
+
+    //    for (int i = 0; i < num; i++)
+    //    {
+    //        BoardGrid[x, NumRows - 1 - i].BlockType = 404;
+    //    }
+    //}
+
+    //void MoveDownBlocks()
+    //{
+    //    Block[] allB = FindObjectsOfType(typeof(Block)) as Block[];
+    //    int moveDownBy = 0;
+
+    //    for (int column = 0; column < NumColumns; column++)
+    //    {
+    //        for (int row = NumRows - 1; row >= 0; row--)
+    //        {
+    //            if (BoardGrid[column, row].BlockType == 404)
+    //            {
+    //                foreach (Block b in allB)
+    //                {
+    //                    if (b.Column == column && b.Row > row)
+    //                    {
+    //                        b.ReadyToMove = true;
+    //                        b.Row -= 1;
+    //                    }
+    //                }
+    //                moveDownBy++;
+    //            }
+    //        }
+
+    //        foreach (Block b in allB)
+    //        {
+    //            if (b.ReadyToMove)
+    //            {
+    //                b.StartCoroutine(b.MoveDown(moveDownBy));
+    //                b.ReadyToMove = false;
+    //                BoardGrid[b.Column, b.Row] = b;
+    //            }
+    //        }
+
+    //        MarkEmpty(column, moveDownBy);
+
+    //        moveDownBy = 0;
+    //    }
+
+    //    Respawn();
+    //}
 
 }
