@@ -270,6 +270,7 @@ MonoBehaviour:
   - {fileID: 463000, guid: 0158f540b817cfc48aeaa5110046520f, type: 2}
   - {fileID: 435552, guid: 36c1743f941a1d54aa55e1108eef5121, type: 2}
   - {fileID: 448934, guid: 7f3d9678cbc2135479ec8eecfed6d08e, type: 2}
+  TilePrefab: {fileID: 438034, guid: 7dc0a2867898da64f93047d73f46c416, type: 2}
   NumColumns: 9
   NumRows: 9
   SwapSpeed: 1

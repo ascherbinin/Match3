@@ -10,18 +10,21 @@ public class Board : MonoBehaviour
 
 
     public Transform[] BlockArray = new Transform[5];
+    public Transform TilePrefab;
 
     public int NumColumns = 9;
     public int NumRows = 9;
 
     private Block[,] BoardGrid;
 
+    private Tile[,] TileGrid;
+
     public float SwapSpeed;
 
     private Color _blockColor = Color.white;
 
     private bool _canSwap = true;
-    private bool _needCheckMacthPossible = false;
+    private bool _checkBoardForMatch = false;
 
     [SerializeField]
     private List<Block> blockList = new List<Block>();
@@ -67,6 +70,18 @@ public class Board : MonoBehaviour
         return set;
     }
 
+    void CreateTileGrid()
+    {
+        for (int row = 0; row < NumRows; row++)
+        {
+            for (int column = 0; column < NumColumns; column++)
+            {
+                CreateTileAtColumn(column, row);
+            }
+        }
+
+    }
+
     Block CreateBlockAtColumn(int column, int row, int blockType)
     {
         Transform block = Instantiate(BlockArray[blockType], new Vector3(column * 1.95f, row * 1.95f, 0f), Quaternion.identity) as Transform;
@@ -85,15 +100,31 @@ public class Board : MonoBehaviour
         return b;
     }
 
+    void CreateTileAtColumn(int column,int row)
+    {
+        Transform tile = Instantiate(TilePrefab, new Vector3(column * 1.95f, row * 1.95f, 0f), Quaternion.identity) as Transform;
+        tile.name = "Tile[X:" + column + " Y:" + row + "]";
+
+
+  
+    }
+    
+
     void GenerateBoard()
     {
+        CreateTileGrid();
         CreateInitialBlock();
+
+        
     }
 
 
     void Awake()
     {
         BoardGrid = new Block[NumColumns, NumRows];
+        TileGrid = new Tile[NumColumns, NumRows];
+
+       
     }
 
     void Start()
@@ -105,6 +136,8 @@ public class Board : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        //StartCoroutine(CheckingBoard());
 
         if (Block.Select)
         {
@@ -125,7 +158,7 @@ public class Board : MonoBehaviour
                 {
                     _canSwap = false;
                     StartCoroutine(SwapBlockEffect(true));
-
+                    
                 }
 
             }
@@ -138,9 +171,22 @@ public class Board : MonoBehaviour
                 Block.MoveTo = null;
             }
 
+            
         }
 
+        while(CheckRemoveMatches())
+        {
+            
+            StartCoroutine(Respawn());
+        }
 
+        //if (_checkBoardForMatch)
+        //{
+        //    _checkBoardForMatch = false;
+
+        //    Respawn();
+            
+        //}
     }
 
 
@@ -174,45 +220,7 @@ public class Board : MonoBehaviour
         Debug.Log("Функция CheckifNear не вернула TRUE");
         return false;
     }
-
-    //IEnumerator Swap()
-    //{
-    //    Block sel = Block.Select.gameObject.GetComponent<Block>();
-    //    Block mov = Block.MoveTo.gameObject.GetComponent<Block>();
-
-    //    Vector3 selTempPos = sel.transform.position;
-    //    Vector3 movTempPos = mov.transform.position;
-
-
-
-    //    int columnSelect = sel.Column;
-    //    int rowSelect = sel.Row;
-    //    int columnMove = mov.Column;
-    //    int rowMove = mov.Row;
-
-    //    BoardGrid[columnSelect, rowSelect] = mov;
-    //    mov.Column = columnSelect;
-    //    mov.Row = rowSelect;
-
-    //    BoardGrid[columnMove, rowMove] = sel;
-    //    sel.Column = columnMove;
-    //    sel.Row = rowMove;
-
-    //    float time = 0;
-
-    //    while (time < 1)
-    //    {
-    //        time += Time.deltaTime * SwapSpeed;
-    //        sel.transform.position = Vector3.Lerp(selTempPos, movTempPos, time);
-    //        mov.transform.position = Vector3.Lerp(movTempPos, selTempPos, time);
-    //        yield return null;
-    //    }
-
-    //    _canSwap = true;
-
-    //}
-
-
+       
     List<BlockChain> DetectHorizontalMatches()
     {
         List<BlockChain> set = new List<BlockChain>();
@@ -284,18 +292,7 @@ public class Board : MonoBehaviour
         }
         return set;
     }
-
-    //List<BlockChain> PossibleRemoveMatches()
-    //{
-    //    List<BlockChain> horizontalChains = DetectHorizontalMatches();
-    //    List<BlockChain> verticalChains = DetectVerticalMatches();
-
-    //    List<BlockChain> ResultChains = new List<BlockChain>(horizontalChains);
-    //    ResultChains.AddRange(verticalChains);
-
-    //    return ResultChains;
-    //}
-
+        
     void MarkToRemoveBlocks(List<BlockChain> chains)
     {
 
@@ -318,9 +315,11 @@ public class Board : MonoBehaviour
     {
         List<BlockChain> chainsArray = RemoveMatches();
 
-        if(chainsArray.Count >0)
+        if (chainsArray.Count > 0)
         {
+            _checkBoardForMatch = true;
             return true;
+            
         }
         else
         {
@@ -344,9 +343,10 @@ public class Board : MonoBehaviour
 
 
 
-
-    void Respawn()
+    IEnumerator Respawn()
     {
+        yield return new WaitForSeconds(1.1f);
+
         for (int x = 0; x < NumColumns; x++)
         {
             for (int y = 0; y < NumRows; y++)
@@ -354,32 +354,20 @@ public class Board : MonoBehaviour
                 if (BoardGrid[x, y].BlockType == 404)
                 { //Spawn it only on destroyed block
                     BoardGrid[x, y].StartCoroutine("DestroyBlock");
+                    
                     CreateBlockAtColumn(x, y, Random.Range(0, BlockArray.Length - 1));
 
-
+                    
                 }
             }
         }
+        
+        _checkBoardForMatch = true;
     }
 
 
+   
 
-    //public void Restart()
-    //{
-
-    //    foreach (var b in blockList)
-    //    {
-    //        GameObject.Destroy(b);
-    //    }
-    //    for (int x = 0; x < NumColumns; x++)
-    //    {
-    //        for (int y = 0; y < NumRows; y++)
-    //        {
-    //            AddNewBlock(x, y);
-    //        }
-    //    }
-    //    gameObject.transform.position = new Vector2(-6.0f, -6.0f);
-    //}
 
     IEnumerator SwapBlockEffect(bool match)
     {
@@ -405,29 +393,6 @@ public class Board : MonoBehaviour
         sel.Column = columnMove;
         sel.Row = rowMove;
 
-        #region OldDataSwap
-        //int tempx = sel.x;
-        //int tempy = sel.y;
-        //int tempid = sel.typeid;
-        //swap data
-        //sel.x = mov.x;
-        //sel.y = mov.y;
-        //sel.typeid = mov.typeid;
-
-        //mov.x = tempx;
-        //mov.y = tempy;
-        //mov.typeid = tempid;
-
-
-
-        //change id in board
-        //boardgrid[sel.x, sel.y].typeid = sel.typeid;
-        //boardgrid[mov.x, mov.y].typeid = mov.typeid;
-
-        //boardgrid [sel.x, sel.y] = mov;
-        //boardgrid [mov.x, mov.y] = sel;
-        #endregion
-
         float time = 0;
 
         while (time < 1)
@@ -451,7 +416,8 @@ public class Board : MonoBehaviour
                 _blockColor = Color.white;
                 Block.Select = null;
                 Block.MoveTo = null;
-                Respawn();
+                
+                
             }
             else
             {
@@ -461,6 +427,7 @@ public class Board : MonoBehaviour
                 _blockColor = Color.white;
                 Block.Select = null;
                 Block.MoveTo = null;
+                
             }
         }
         else
@@ -468,57 +435,69 @@ public class Board : MonoBehaviour
             _canSwap = true; //End effect
         }
 
+        
     }
 
-    //void MarkEmpty(int x, int num)
+  
+
+    //IEnumerator CheckingBoard()
     //{
-
-
-    //    for (int i = 0; i < num; i++)
+    //    while(CheckRemoveMatches())
     //    {
-    //        BoardGrid[x, NumRows - 1 - i].BlockType = 404;
+    //        CheckRemoveMatches();
+    //        yield return null;
     //    }
     //}
+    
 
-    //void MoveDownBlocks()
-    //{
-    //    Block[] allB = FindObjectsOfType(typeof(Block)) as Block[];
-    //    int moveDownBy = 0;
+    void MarkEmpty(int x, int num)
+    {
+        
+        for (int i = 0; i < num; i++)
+        {
+            BoardGrid[x, NumRows - 1 - i].BlockType = 404;
+        }
+    }
 
-    //    for (int column = 0; column < NumColumns; column++)
-    //    {
-    //        for (int row = NumRows - 1; row >= 0; row--)
-    //        {
-    //            if (BoardGrid[column, row].BlockType == 404)
-    //            {
-    //                foreach (Block b in allB)
-    //                {
-    //                    if (b.Column == column && b.Row > row)
-    //                    {
-    //                        b.ReadyToMove = true;
-    //                        b.Row -= 1;
-    //                    }
-    //                }
-    //                moveDownBy++;
-    //            }
-    //        }
+    void MoveDownBlocks()
+    {
+        Block[] allB = FindObjectsOfType(typeof(Block)) as Block[];
+        int moveDownBy = 0;
 
-    //        foreach (Block b in allB)
-    //        {
-    //            if (b.ReadyToMove)
-    //            {
-    //                b.StartCoroutine(b.MoveDown(moveDownBy));
-    //                b.ReadyToMove = false;
-    //                BoardGrid[b.Column, b.Row] = b;
-    //            }
-    //        }
+        for (int column = 0; column < NumColumns; column++)
+        {
+            for (int row = NumRows - 1; row >= 0; row--)
+            {
+                if (BoardGrid[column, row].BlockType == 404)
+                {
+                    foreach (Block b in allB)
+                    {
+                        if (b.Column == column && b.Row > row)
+                        {
+                            b.ReadyToMove = true;
+                            b.Row -= 1;
+                        }
+                    }
+                    moveDownBy++;
+                }
+            }
 
-    //        MarkEmpty(column, moveDownBy);
+            foreach (Block b in allB)
+            {
+                if (b.ReadyToMove)
+                {
+                    b.StartCoroutine(b.MoveDown(moveDownBy));
+                    b.ReadyToMove = false;
+                    BoardGrid[b.Column, b.Row] = b;
+                }
+            }
 
-    //        moveDownBy = 0;
-    //    }
+            MarkEmpty(column, moveDownBy);
 
-    //    Respawn();
-    //}
+            moveDownBy = 0;
+        }
+
+        Respawn();
+    }
 
 }

@@ -11,7 +11,7 @@ GameObject:
   - 212: {fileID: 21248934}
   - 61: {fileID: 6152424}
   m_Layer: 0
-  m_Name: YellowBlock
+  m_Name: OrangeTriangle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -66,8 +66,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: 7765a8f7ca8f87a4d91395ebc65a154b, type: 3}
-  m_Color: {r: .835125566, g: .845588207, b: .087045826, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 77503f34139c9bf4780247dedbaf11e3, type: 3}
+  m_Color: {r: .845588207, g: .47939533, b: .087045826, a: 1}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
