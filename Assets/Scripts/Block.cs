@@ -19,15 +19,25 @@ public class Block : MonoBehaviour {
 	public static Transform MoveTo;
 
 	private Vector2 _myScale;
-    
+    private Color _blockColor = new Color(255,255,255,255);
+
+  
 
     public bool NeedFall;
     public bool ReadyToMove;
+
+    void Awake()
+    {
+       
+    }
 
 	// Use this for initialization
 	void Start () {
 		_myScale = transform.localScale;
         _startTime = Time.time;
+
+        
+
        if(NeedFall)
        {
            StartCoroutine("FallDown");
@@ -52,7 +62,9 @@ public class Block : MonoBehaviour {
 
 	void OnMouseOver()
 	{
-		transform.localScale = new Vector2 (_myScale.x + 0.2f, _myScale.y + 0.2f);
+		//transform.localScale = new Vector2 (_myScale.x + 0.2f, _myScale.y + 0.2f);
+
+	    
 
 			if(Input.GetButtonDown("Fire1"))
 		{
@@ -69,10 +81,19 @@ public class Block : MonoBehaviour {
 		}
 	}
 
+    private void OnMouseDown()
+    {
+   
+    }
+
+
 	void OnMouseExit()
 	{
-		transform.localScale = _myScale;
+        
+		//transform.localScale = _myScale;
 	}
+
+   
 
     public IEnumerator DestroyBlock()
     {

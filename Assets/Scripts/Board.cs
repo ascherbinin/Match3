@@ -21,7 +21,7 @@ public class Board : MonoBehaviour
 
     public float SwapSpeed;
 
-    private Color _blockColor = Color.white;
+    private Color _blockColor = new Color(255, 255, 255, 255);
 
     private bool _canSwap = true;
     private bool _checkBoardForMatch = false;
@@ -103,6 +103,7 @@ public class Board : MonoBehaviour
     void CreateTileAtColumn(int column,int row)
     {
         Transform tile = Instantiate(TilePrefab, new Vector3(column * 1.95f, row * 1.95f, 0f), Quaternion.identity) as Transform;
+        tile.transform.parent = GameObject.Find("Tiles").transform;
         tile.name = "Tile[X:" + column + " Y:" + row + "]";
 
 
@@ -137,18 +138,18 @@ public class Board : MonoBehaviour
     void Update()
     {
 
-        //StartCoroutine(CheckingBoard());
+        
 
-        if (Block.Select)
-        {
-            if (_blockColor == Color.white)
-            {
-                _blockColor = Block.Select.gameObject.GetComponent<Renderer>().material.color;
+        //if (Block.Select)
+        //{
+        //    if (_blockColor == new Color(255,255,255,255))
+        //    {
+        //        _blockColor = Block.Select.gameObject.GetComponent<Renderer>().material.color;
 
-            }
-            Block.Select.gameObject.GetComponent<Renderer>().material.color = Color32.Lerp(_blockColor, Color.black, Mathf.PingPong(Time.time, 0.5f));
+        //    }
+        //    Block.Select.gameObject.GetComponent<Renderer>().material.color = Color32.Lerp(_blockColor, Color.black, Mathf.PingPong(Time.time, 0.5f));
 
-        }
+        //}
 
         if (Block.Select && Block.MoveTo)
         {
@@ -157,7 +158,22 @@ public class Board : MonoBehaviour
                 if (_canSwap)
                 {
                     _canSwap = false;
-                    StartCoroutine(SwapBlockEffect(true));
+                    SwapBlock(false);
+                    if (CheckRemoveMatches())
+                    {
+                        StartCoroutine(Respawn());
+                        _canSwap = true;
+                        Block.Select = null;
+                        Block.MoveTo = null;
+                    }
+                    else
+                    {
+                        SwapBlock(true);
+                        _canSwap = true;
+                        Block.Select = null;
+                        Block.MoveTo = null;
+                    }
+                
                     
                 }
 
@@ -166,7 +182,7 @@ public class Board : MonoBehaviour
             {
 
                 Block.Select.gameObject.GetComponent<Renderer>().material.color = _blockColor;
-                _blockColor = Color.white;
+                _blockColor = new Color(255,255,255,255);
                 Block.Select = null;
                 Block.MoveTo = null;
             }
@@ -317,7 +333,7 @@ public class Board : MonoBehaviour
 
         if (chainsArray.Count > 0)
         {
-            _checkBoardForMatch = true;
+            
             return true;
             
         }
@@ -362,16 +378,13 @@ public class Board : MonoBehaviour
             }
         }
         
-        _checkBoardForMatch = true;
+        
     }
 
 
-   
 
-
-    IEnumerator SwapBlockEffect(bool match)
+    void SwapBlock(bool needBackSwap)
     {
-
         Block sel = Block.Select.gameObject.GetComponent<Block>();
         Block mov = Block.MoveTo.gameObject.GetComponent<Block>();
 
@@ -393,111 +406,123 @@ public class Board : MonoBehaviour
         sel.Column = columnMove;
         sel.Row = rowMove;
 
-        float time = 0;
-
-        while (time < 1)
+        if (!needBackSwap)
         {
-            time += Time.deltaTime * SwapSpeed;
-            sel.transform.position = Vector3.Lerp(selTempPos, movTempPos, time);
-            mov.transform.position = Vector3.Lerp(movTempPos, selTempPos, time);
-            yield return null;
-        }
-
-        //Do we want to run the code to check for match?
-        if (match == true)
-        {
-            //Check for match3
-            if (CheckRemoveMatches())
-            {
-
-                //There is match
-                _canSwap = true;
-                Block.Select.gameObject.GetComponent<Renderer>().material.color = _blockColor;
-                _blockColor = Color.white;
-                Block.Select = null;
-                Block.MoveTo = null;
-                
-                
-            }
-            else
-            {
-                //There is no match, return them in their default position
-                StartCoroutine(SwapBlockEffect(false));//Swap their position and data using new swap effect, without checking for match3
-                Block.Select.gameObject.GetComponent<Renderer>().material.color = _blockColor;
-                _blockColor = Color.white;
-                Block.Select = null;
-                Block.MoveTo = null;
-                
-            }
+            StartCoroutine(SwapBlockEffect());
         }
         else
-        {//We don't
-            _canSwap = true; //End effect
+        {
+            StartCoroutine(BackSwapBlockEffect());
         }
+        
+    }
+   
+
+
+    IEnumerator SwapBlockEffect()
+    {
+        Block sel = Block.Select.gameObject.GetComponent<Block>();
+        Block mov = Block.MoveTo.gameObject.GetComponent<Block>();
+
+        Vector3 selTempPos = sel.transform.position;
+        Vector3 movTempPos = mov.transform.position;
+
+
+        float time = 0;
 
         
+        
+            while (time < 1)
+            {
+                time += Time.deltaTime*SwapSpeed;
+                sel.transform.position = Vector3.Lerp(selTempPos, movTempPos, time);
+                mov.transform.position = Vector3.Lerp(movTempPos, selTempPos, time);
+
+                yield return null;
+            }
+        
+       
+
+        
+    }
+
+    IEnumerator BackSwapBlockEffect()
+    {
+        Block sel = Block.Select.gameObject.GetComponent<Block>();
+        Block mov = Block.MoveTo.gameObject.GetComponent<Block>();
+
+        Vector3 selTempPos = mov.transform.position;
+        Vector3 movTempPos = sel.transform.position ;
+
+
+        float time = 0;
+
+        yield return StartCoroutine(SwapBlockEffect());
+        
+            while (time < 1)
+            {
+                time += Time.deltaTime * SwapSpeed;
+                sel.transform.position = Vector3.Lerp(selTempPos, movTempPos, time);
+                mov.transform.position = Vector3.Lerp(movTempPos, selTempPos, time);
+
+                yield return null;
+            }
+        }
+        
+
+
     }
 
   
-
-    //IEnumerator CheckingBoard()
-    //{
-    //    while(CheckRemoveMatches())
-    //    {
-    //        CheckRemoveMatches();
-    //        yield return null;
-    //    }
-    //}
     
 
-    void MarkEmpty(int x, int num)
-    {
+    //void MarkEmpty(int x, int num)
+    //{
         
-        for (int i = 0; i < num; i++)
-        {
-            BoardGrid[x, NumRows - 1 - i].BlockType = 404;
-        }
-    }
+    //    for (int i = 0; i < num; i++)
+    //    {
+    //        BoardGrid[x, NumRows - 1 - i].BlockType = 404;
+    //    }
+    //}
 
-    void MoveDownBlocks()
-    {
-        Block[] allB = FindObjectsOfType(typeof(Block)) as Block[];
-        int moveDownBy = 0;
+    //void MoveDownBlocks()
+    //{
+    //    Block[] allB = FindObjectsOfType(typeof(Block)) as Block[];
+    //    int moveDownBy = 0;
 
-        for (int column = 0; column < NumColumns; column++)
-        {
-            for (int row = NumRows - 1; row >= 0; row--)
-            {
-                if (BoardGrid[column, row].BlockType == 404)
-                {
-                    foreach (Block b in allB)
-                    {
-                        if (b.Column == column && b.Row > row)
-                        {
-                            b.ReadyToMove = true;
-                            b.Row -= 1;
-                        }
-                    }
-                    moveDownBy++;
-                }
-            }
+    //    for (int column = 0; column < NumColumns; column++)
+    //    {
+    //        for (int row = NumRows - 1; row >= 0; row--)
+    //        {
+    //            if (BoardGrid[column, row].BlockType == 404)
+    //            {
+    //                foreach (Block b in allB)
+    //                {
+    //                    if (b.Column == column && b.Row > row)
+    //                    {
+    //                        b.ReadyToMove = true;
+    //                        b.Row -= 1;
+    //                    }
+    //                }
+    //                moveDownBy++;
+    //            }
+    //        }
 
-            foreach (Block b in allB)
-            {
-                if (b.ReadyToMove)
-                {
-                    b.StartCoroutine(b.MoveDown(moveDownBy));
-                    b.ReadyToMove = false;
-                    BoardGrid[b.Column, b.Row] = b;
-                }
-            }
+    //        foreach (Block b in allB)
+    //        {
+    //            if (b.ReadyToMove)
+    //            {
+    //                b.StartCoroutine(b.MoveDown(moveDownBy));
+    //                b.ReadyToMove = false;
+    //                BoardGrid[b.Column, b.Row] = b;
+    //            }
+    //        }
 
-            MarkEmpty(column, moveDownBy);
+    //        MarkEmpty(column, moveDownBy);
 
-            moveDownBy = 0;
-        }
+    //        moveDownBy = 0;
+    //    }
 
-        Respawn();
-    }
+    //    Respawn();
+    //}
 
-}
