@@ -391,7 +391,14 @@ public class Board : MonoBehaviour
         Vector3 selTempPos = sel.transform.position;
         Vector3 movTempPos = mov.transform.position;
 
-
+        if (!needBackSwap)
+        {
+            StartCoroutine(SwapBlockEffect());
+        }
+        else
+        {
+            StartCoroutine(BackSwapBlockEffect());
+        }
 
         int columnSelect = sel.Column;
         int rowSelect = sel.Row;
@@ -406,14 +413,7 @@ public class Board : MonoBehaviour
         sel.Column = columnMove;
         sel.Row = rowMove;
 
-        if (!needBackSwap)
-        {
-            StartCoroutine(SwapBlockEffect());
-        }
-        else
-        {
-            StartCoroutine(BackSwapBlockEffect());
-        }
+       
         
     }
    

@@ -10,7 +10,7 @@ GameObject:
   - 4: {fileID: 465144}
   - 212: {fileID: 21265144}
   - 61: {fileID: 6133402}
-  - 95: {fileID: 9559738}
+  - 95: {fileID: 9511388}
   m_Layer: 0
   m_Name: BlueSquare
   m_TagString: Untagged
@@ -43,7 +43,7 @@ BoxCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Size: {x: 1.70666671, y: 1.70666671}
---- !u!95 &9559738
+--- !u!95 &9511388
 Animator:
   serializedVersion: 3
   m_ObjectHideFlags: 1
