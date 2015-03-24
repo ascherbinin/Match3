@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 using System.Collections;
 using System.Collections.Generic;
@@ -7,8 +8,6 @@ using BlockNS;
 
 public class Board : MonoBehaviour
 {
-
-
     public Transform[] BlockArray = new Transform[5];
     public Transform TilePrefab;
 
@@ -17,31 +16,14 @@ public class Board : MonoBehaviour
 
     private Block[,] BoardGrid;
 
-    private Tile[,] TileGrid;
-
     public float SwapSpeed;
 
-    private Color _blockColor = new Color(255, 255, 255, 255);
+    private int Score = 0;
 
+    public Text scoreText;
+   
     private bool _canSwap = true;
-    private bool _checkBoardForMatch = false;
-
-    [SerializeField]
-    private List<Block> blockList = new List<Block>();
-
-    Block BlockAtColumn(int column, int row)
-    {
-        if ((column >= 0 && column < NumColumns) && (row >= 0 && row < NumRows))
-        {
-            return BoardGrid[column, row];
-        }
-        else
-        {
-            Debug.Log("Ошибка, блок находится за границей сетки");
-            return null;
-        }
-    }
-
+    
     List<Block> CreateInitialBlock()
     {
         List<Block> set = new List<Block>();
@@ -88,7 +70,7 @@ public class Board : MonoBehaviour
         block.transform.parent = gameObject.transform;
         block.name = "Block[X:" + column + " Y:" + row + "]";
 
-        Block b = block.gameObject.AddComponent<Block>();
+        Block b = block.gameObject.GetComponent<Block>();
         b.BlockType = blockType;
         b.Column = column;
         b.Row = row;
@@ -105,8 +87,6 @@ public class Board : MonoBehaviour
         Transform tile = Instantiate(TilePrefab, new Vector3(column * 1.95f, row * 1.95f, 0f), Quaternion.identity) as Transform;
         tile.transform.parent = GameObject.Find("Tiles").transform;
         tile.name = "Tile[X:" + column + " Y:" + row + "]";
-
-
   
     }
     
@@ -123,33 +103,20 @@ public class Board : MonoBehaviour
     void Awake()
     {
         BoardGrid = new Block[NumColumns, NumRows];
-        TileGrid = new Tile[NumColumns, NumRows];
-
-       
+        
     }
 
     void Start()
     {
         GenerateBoard();
-
     }
 
-    // Update is called once per frame
+  
     void Update()
     {
 
         
 
-        //if (Block.Select)
-        //{
-        //    if (_blockColor == new Color(255,255,255,255))
-        //    {
-        //        _blockColor = Block.Select.gameObject.GetComponent<Renderer>().material.color;
-
-        //    }
-        //    Block.Select.gameObject.GetComponent<Renderer>().material.color = Color32.Lerp(_blockColor, Color.black, Mathf.PingPong(Time.time, 0.5f));
-
-        //}
 
         if (Block.Select && Block.MoveTo)
         {
@@ -181,8 +148,7 @@ public class Board : MonoBehaviour
             else
             {
 
-                Block.Select.gameObject.GetComponent<Renderer>().material.color = _blockColor;
-                _blockColor = new Color(255,255,255,255);
+                
                 Block.Select = null;
                 Block.MoveTo = null;
             }
@@ -196,13 +162,7 @@ public class Board : MonoBehaviour
             StartCoroutine(Respawn());
         }
 
-        //if (_checkBoardForMatch)
-        //{
-        //    _checkBoardForMatch = false;
-
-        //    Respawn();
-            
-        //}
+        scoreText.text = Score.ToString();
     }
 
 
@@ -351,6 +311,9 @@ public class Board : MonoBehaviour
         MarkToRemoveBlocks(horizontalChains);
         MarkToRemoveBlocks(verticalChains);
 
+        Score += CalculateScore(horizontalChains);
+        Score += CalculateScore(verticalChains);
+
         List<BlockChain> ResultChains = new List<BlockChain>(horizontalChains);
         ResultChains.AddRange(verticalChains);
 
@@ -369,7 +332,7 @@ public class Board : MonoBehaviour
             {
                 if (BoardGrid[x, y].BlockType == 404)
                 { //Spawn it only on destroyed block
-                    BoardGrid[x, y].StartCoroutine("DestroyBlock");
+                    BoardGrid[x, y].HitBlock();
                     
                     CreateBlockAtColumn(x, y, Random.Range(0, BlockArray.Length - 1));
 
@@ -381,16 +344,23 @@ public class Board : MonoBehaviour
         
     }
 
+    public int CalculateScore(List<BlockChain> chains)
+    {
+        foreach (var chain in chains)
+        {
+            chain.Score = 60 * (chain.Blocks().Count - 2);
+            return chain.Score;
+        }
 
+        return  0;
+    }
 
     void SwapBlock(bool needBackSwap)
     {
         Block sel = Block.Select.gameObject.GetComponent<Block>();
         Block mov = Block.MoveTo.gameObject.GetComponent<Block>();
 
-        Vector3 selTempPos = sel.transform.position;
-        Vector3 movTempPos = mov.transform.position;
-
+        
         if (!needBackSwap)
         {
             StartCoroutine(SwapBlockEffect());

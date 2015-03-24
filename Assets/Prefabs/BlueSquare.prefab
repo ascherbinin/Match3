@@ -11,6 +11,7 @@ GameObject:
   - 212: {fileID: 21265144}
   - 61: {fileID: 6133402}
   - 95: {fileID: 9511388}
+  - 114: {fileID: 11427530}
   m_Layer: 0
   m_Name: BlueSquare
   m_TagString: Untagged
@@ -25,7 +26,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 165144}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -5.0999999, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -60,6 +61,22 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
+--- !u!114 &11427530
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 165144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 658ee145ddaa9ec4ebabc5f732b468cc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BlockType: 0
+  Column: 0
+  Row: 0
+  NeedFall: 0
+  ReadyToMove: 0
 --- !u!212 &21265144
 SpriteRenderer:
   m_ObjectHideFlags: 1
@@ -82,7 +99,7 @@ SpriteRenderer:
   m_AutoUVMaxDistance: .5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
+  m_SortingLayerID: -2021950187
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 0cc1ec5ae246d8b488dc132494743ac3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}

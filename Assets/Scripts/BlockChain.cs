@@ -14,7 +14,7 @@ namespace BlockNS
     public class BlockChain
     {
 
-        
+        public int Score = 0;
 
         List<Block> _blocks;
 
@@ -32,10 +32,13 @@ namespace BlockNS
             return _blocks;
         }
 
+       
         public int Length()
         {
             return _blocks.Count;
         }
+
+       
 
         public ChainType ChainType { get; set; }
     }

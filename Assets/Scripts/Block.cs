@@ -22,9 +22,12 @@ namespace BlockNS
         private Vector2 _myScale;
         private bool _isSelected = false;
 
+        public bool IsDestroyed { get; set; }
+
 
         private Animator _animator;
 
+        private int _countMatch = 1;
 
 
         public bool NeedFall;
@@ -35,7 +38,7 @@ namespace BlockNS
             _animator = GetComponent<Animator>();
         }
 
-        // Use this for initialization
+        
         void Start()
         {
             _myScale = transform.localScale;
@@ -73,6 +76,11 @@ namespace BlockNS
             {
                 _animator.SetBool("blockSelected", false);
             }
+
+            if(IsDestroyed)
+            {
+                _animator.SetTrigger("blockDestroy");
+            }
         }
 
         void OnMouseOver()
@@ -107,27 +115,19 @@ namespace BlockNS
             }
         }
 
-
-
-        public IEnumerator DestroyBlock()
+        public void DestroyBlock()
         {
-            Vector3 lastScaleSize = transform.localScale;
-            
-            float time = 0;
-
-            while (time < 1)
-            {
-                time += Time.deltaTime;
-                transform.localScale = Vector3.Lerp(lastScaleSize, Vector3.zero, time);
-                yield return null;
-            }
-
             Destroy(gameObject);
-
-
         }
 
-       
+      
+        public void HitBlock()
+        {
+            if(--_countMatch<=0)
+            {
+                IsDestroyed = true;
+            }
+        }
 
         public IEnumerator MoveDown(int rows)
         {
