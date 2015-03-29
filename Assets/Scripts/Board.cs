@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 
 using System.Collections;
@@ -18,10 +19,6 @@ public class Board : MonoBehaviour
 
     public float SwapSpeed;
 
-    private int Score = 0;
-
-    public Text scoreText;
-   
     private bool _canSwap = true;
     
     List<Block> CreateInitialBlock()
@@ -162,7 +159,7 @@ public class Board : MonoBehaviour
             StartCoroutine(Respawn());
         }
 
-        scoreText.text = Score.ToString();
+       
     }
 
 
@@ -311,8 +308,8 @@ public class Board : MonoBehaviour
         MarkToRemoveBlocks(horizontalChains);
         MarkToRemoveBlocks(verticalChains);
 
-        Score += CalculateScore(horizontalChains);
-        Score += CalculateScore(verticalChains);
+        ScoreManager.instance.AddScore(CalculateScore(horizontalChains));
+        ScoreManager.instance.AddScore(CalculateScore(verticalChains)); 
 
         List<BlockChain> ResultChains = new List<BlockChain>(horizontalChains);
         ResultChains.AddRange(verticalChains);
