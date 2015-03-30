@@ -63,7 +63,7 @@ public class Board : MonoBehaviour
 
     Block CreateBlockAtColumn(int column, int row, int blockType)
     {
-        Transform block = Instantiate(BlockArray[blockType], new Vector3(column * 1.95f, row * 1.95f, 0f), Quaternion.identity) as Transform;
+        Transform block = Instantiate(BlockArray[blockType], new Vector3(column * 1.0f, row * 1.0f, 0f), Quaternion.identity) as Transform;
         block.transform.parent = gameObject.transform;
         block.name = "Block[X:" + column + " Y:" + row + "]";
 
@@ -81,7 +81,7 @@ public class Board : MonoBehaviour
 
     void CreateTileAtColumn(int column,int row)
     {
-        Transform tile = Instantiate(TilePrefab, new Vector3(column * 1.95f, row * 1.95f, 0f), Quaternion.identity) as Transform;
+        Transform tile = Instantiate(TilePrefab, new Vector3(column * 0.85f, row * 0.85f, 0f), Quaternion.identity) as Transform;
         tile.transform.parent = GameObject.Find("Tiles").transform;
         tile.name = "Tile[X:" + column + " Y:" + row + "]";
   
