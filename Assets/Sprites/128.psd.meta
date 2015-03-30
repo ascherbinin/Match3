@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: 0cc1ec5ae246d8b488dc132494743ac3
-timeCreated: 1427638949
+guid: 43f52f53b1425f545ae1fd2df49ca2bc
+timeCreated: 1427708786
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
-    21300000: 12_0
+    21300000: 128_0
+    21300002: 128_1
+    21300004: 128_2
+    21300006: 128_3
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -27,8 +30,8 @@ TextureImporter:
   cubemapConvolutionSteps: 8
   cubemapConvolutionExponent: 1.5
   seamlessCubemap: 0
-  textureFormat: -3
-  maxTextureSize: 128
+  textureFormat: -1
+  maxTextureSize: 2048
   textureSettings:
     filterMode: -1
     aniso: 16
@@ -43,23 +46,53 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: .5, y: .5}
-  spriteBorder: {x: 31, y: 31, z: 31, w: 31}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spritePixelsToUnits: 100
   alphaIsTransparency: 1
   textureType: 8
   buildTargetSettings: []
   spriteSheet:
     sprites:
-    - name: 12_0
+    - name: 128_0
       rect:
         serializedVersion: 2
-        x: 31
-        y: 31
-        width: 66
-        height: 66
+        x: 1
+        y: 65
+        width: 63
+        height: 64
       alignment: 0
       pivot: {x: .5, y: .5}
-      border: {x: 1, y: 1, z: 1, w: 1}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: 128_1
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 65
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: 128_2
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1
+        width: 64
+        height: 63
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+    - name: 128_3
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 1
+        width: 64
+        height: 63
+      alignment: 0
+      pivot: {x: .5, y: .5}
+      border: {x: 0, y: 0, z: 0, w: 0}
   spritePackingTag: 
   userData: 
   assetBundleName: 
