@@ -4,18 +4,20 @@ using UnityEngine.UI;
 
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using BlockNS;
 
 
-public class Board : MonoBehaviour
+public class BoardManager : MonoBehaviour
 {
     public Transform[] BlockArray = new Transform[5];
     public Transform TilePrefab;
 
     public int NumColumns = 9;
-    public int NumRows = 9;
+    public int NumRows = 8;
 
     private Block[,] BoardGrid;
+    private int[,] TileBoard;
 
     public float SwapSpeed;
 
@@ -49,13 +51,48 @@ public class Board : MonoBehaviour
         return set;
     }
 
+    void ReadLevelFromFile(string levelName)
+    {
+        string currLevel = Application.dataPath + @"/Levels/" + levelName + ".txt";
+
+      if(File.Exists(currLevel))
+      {
+         int[,] TileBoard = ReadTxtLevelData(currLevel);
+      }
+      else
+      {
+          Debug.Log("Не найден: "+ levelName);
+          
+      }
+    }
+
+    int[,] ReadTxtLevelData (string filePath)
+    {
+        
+		string[] lines = File.ReadAllLines(filePath);
+		int[,] bitMatrix  = new int[lines.Length, lines[0].Split(' ').Length];
+		for (int i = 0; i < lines.Length; i++)
+		{
+			string[] temp = lines[i].Split(' ');
+			for (int j = 0; j < temp.Length; j++)
+				bitMatrix[i, j] = System.Int32.Parse(temp[j]);
+		}
+        return bitMatrix;
+    }
+
     void CreateTileGrid()
     {
-        for (int row = 0; row < NumRows; row++)
+        ReadTxtLevelData("level1");
+        
+		for (int row = 0; row < NumRows; row++)
         {
             for (int column = 0; column < NumColumns; column++)
             {
+                if(TileBoard[column,row] == 1)
+                {
                 CreateTileAtColumn(column, row);
+                }
+
             }
         }
 
@@ -63,7 +100,7 @@ public class Board : MonoBehaviour
 
     Block CreateBlockAtColumn(int column, int row, int blockType)
     {
-        Transform block = Instantiate(BlockArray[blockType], new Vector3(column * 1.0f, row * 1.0f, 0f), Quaternion.identity) as Transform;
+        Transform block = Instantiate(BlockArray[blockType], new Vector3(column * 0.75f, row * 0.70f, 0f), Quaternion.identity) as Transform;
         block.transform.parent = gameObject.transform;
         block.name = "Block[X:" + column + " Y:" + row + "]";
 
@@ -81,7 +118,7 @@ public class Board : MonoBehaviour
 
     void CreateTileAtColumn(int column,int row)
     {
-        Transform tile = Instantiate(TilePrefab, new Vector3(column * 0.85f, row * 0.85f, 0f), Quaternion.identity) as Transform;
+        Transform tile = Instantiate(TilePrefab, new Vector3(column * 0.75f, row * 0.70f, 0f), Quaternion.identity) as Transform;
         tile.transform.parent = GameObject.Find("Tiles").transform;
         tile.name = "Tile[X:" + column + " Y:" + row + "]";
   
@@ -90,8 +127,9 @@ public class Board : MonoBehaviour
 
     void GenerateBoard()
     {
+		
         CreateTileGrid();
-        CreateInitialBlock();
+     //   CreateInitialBlock();
 
         
     }
@@ -99,12 +137,15 @@ public class Board : MonoBehaviour
 
     void Awake()
     {
+        TileBoard = new int[NumColumns,NumRows];
+        ReadLevelFromFile("level1");
         BoardGrid = new Block[NumColumns, NumRows];
         
     }
 
     void Start()
     {
+        
         GenerateBoard();
     }
 
@@ -153,11 +194,11 @@ public class Board : MonoBehaviour
             
         }
 
-        while(CheckRemoveMatches())
-        {
+       // while(CheckRemoveMatches())
+      //  {
             
-            StartCoroutine(Respawn());
-        }
+      //      StartCoroutine(Respawn());
+      //  }
 
        
     }
@@ -440,7 +481,7 @@ public class Board : MonoBehaviour
 
     }
 
-  
+
     
 
     //void MarkEmpty(int x, int num)

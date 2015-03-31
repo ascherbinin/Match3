@@ -61,6 +61,10 @@ TextureImporter:
     maxTextureSize: 512
     textureFormat: -3
     compressionQuality: 50
+  - buildTarget: WP8
+    maxTextureSize: 512
+    textureFormat: -3
+    compressionQuality: 50
   spriteSheet:
     sprites:
     - name: gems_0

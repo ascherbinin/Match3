@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: b51f0ccfb98f0d049934b672d6fd2d90
-timeCreated: 1426663679
+guid: 18aa467d0d857d24790dbc22f4047346
+timeCreated: 1427785072
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName: {}
@@ -26,8 +26,8 @@ TextureImporter:
   cubemapConvolutionSteps: 8
   cubemapConvolutionExponent: 1.5
   seamlessCubemap: 0
-  textureFormat: -3
-  maxTextureSize: 128
+  textureFormat: -1
+  maxTextureSize: 2048
   textureSettings:
     filterMode: -1
     aniso: 16
@@ -43,11 +43,11 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: .5, y: .5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spritePixelsToUnits: 150
+  spritePixelsToUnits: 100
   alphaIsTransparency: 1
   textureType: 8
   buildTargetSettings:
-  - buildTarget: iPhone
+  - buildTarget: WP8
     maxTextureSize: 256
     textureFormat: -3
     compressionQuality: 50

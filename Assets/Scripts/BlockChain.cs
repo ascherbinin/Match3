@@ -18,6 +18,7 @@ namespace BlockNS
 
         List<Block> _blocks;
 
+
         public void AddBlock(Block block)
         {
             if (_blocks == null)
