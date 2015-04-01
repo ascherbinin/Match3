@@ -265,6 +265,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cfc17f7e267eab4eb63c0e42d727dc6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  SwapSpeed: 1
 --- !u!212 &410542757
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -535,8 +536,6 @@ MonoBehaviour:
   TilePrefab: {fileID: 438034, guid: 7dc0a2867898da64f93047d73f46c416, type: 2}
   NumColumns: 9
   NumRows: 8
-  levelData: {fileID: 0}
-  SwapSpeed: 1
 --- !u!4 &1253830244
 Transform:
   m_ObjectHideFlags: 0

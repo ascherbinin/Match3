@@ -16,17 +16,17 @@ public class BoardManager : MonoBehaviour
     public Transform[] BlockArray = new Transform[5];
     public Transform TilePrefab;
 
+    public static BoardManager instance = null;
+
     public int NumColumns = 9;
     public int NumRows = 8;
 
-    private Block[,] BoardGrid;
+    public Block[,] BoardGrid;
     private int[,] TileBoard;
 
-    public TextAsset levelData;
+   
 
-    public float SwapSpeed;
-
-    private bool _canSwap = true;
+   
 
     List<Block> CreateInitialBlock()
     {
@@ -136,7 +136,7 @@ public class BoardManager : MonoBehaviour
     }
 
 
-    void GenerateBoard()
+    public void GenerateBoard()
     {
 
         CreateTileGrid();
@@ -144,20 +144,29 @@ public class BoardManager : MonoBehaviour
 
 
     }
-
-
+   
     void Awake()
     {
+        if (instance == null)
+        {
+            instance = this;
+            BoardGrid = new Block[NumColumns, NumRows];
+        }
+        else if (instance != this)
+        {
+            Destroy(gameObject);
+        }
 
-
-        BoardGrid = new Block[NumColumns, NumRows];
-
+        DontDestroyOnLoad(gameObject);
     }
+
+
+  
 
     void Start()
     {
 
-        GenerateBoard();
+       // GenerateBoard();
     }
 
 
@@ -166,56 +175,10 @@ public class BoardManager : MonoBehaviour
 
 
 
-
-        if (Block.Select && Block.MoveTo)
-        {
-            if (CheckIfNear() == true)
-            {
-                if (_canSwap)
-                {
-                    _canSwap = false;
-                    SwapBlock(false);
-                    if (CheckRemoveMatches())
-                    {
-                        StartCoroutine(Respawn());
-                        _canSwap = true;
-                        Block.Select = null;
-                        Block.MoveTo = null;
-                    }
-                    else
-                    {
-                        SwapBlock(true);
-                        _canSwap = true;
-                        Block.Select = null;
-                        Block.MoveTo = null;
-                    }
-
-
-                }
-
-            }
-            else
-            {
-
-
-                Block.Select = null;
-                Block.MoveTo = null;
-            }
-
-
-        }
-
-         while(CheckRemoveMatches())
-          {
-
-             StartCoroutine(Respawn());
-          }
-
-
     }
 
 
-    bool CheckIfNear()
+    public bool CheckIfNear()
     {
         Block selectBlock = Block.Select.gameObject.GetComponent<Block>();
         Block moveToBlock = Block.MoveTo.gameObject.GetComponent<Block>();
@@ -336,7 +299,7 @@ public class BoardManager : MonoBehaviour
 
     }
 
-    bool CheckRemoveMatches()
+    public bool CheckRemoveMatches()
     {
         List<BlockChain> chainsArray = RemoveMatches();
 
@@ -371,7 +334,7 @@ public class BoardManager : MonoBehaviour
 
 
 
-    IEnumerator Respawn()
+    public IEnumerator Respawn()
     {
         yield return new WaitForSeconds(1.1f);
 
@@ -404,90 +367,7 @@ public class BoardManager : MonoBehaviour
         return 0;
     }
 
-    void SwapBlock(bool needBackSwap)
-    {
-        Block sel = Block.Select.gameObject.GetComponent<Block>();
-        Block mov = Block.MoveTo.gameObject.GetComponent<Block>();
-
-
-        if (!needBackSwap)
-        {
-            StartCoroutine(SwapBlockEffect());
-        }
-        else
-        {
-            StartCoroutine(BackSwapBlockEffect());
-        }
-
-        int columnSelect = sel.Column;
-        int rowSelect = sel.Row;
-        int columnMove = mov.Column;
-        int rowMove = mov.Row;
-
-        BoardGrid[columnSelect, rowSelect] = mov;
-        mov.Column = columnSelect;
-        mov.Row = rowSelect;
-
-        BoardGrid[columnMove, rowMove] = sel;
-        sel.Column = columnMove;
-        sel.Row = rowMove;
-
-
-
-    }
-
-
-
-    IEnumerator SwapBlockEffect()
-    {
-        Block sel = Block.Select.gameObject.GetComponent<Block>();
-        Block mov = Block.MoveTo.gameObject.GetComponent<Block>();
-
-        Vector3 selTempPos = sel.transform.position;
-        Vector3 movTempPos = mov.transform.position;
-
-
-        float time = 0;
-
-
-
-        while (time < 1)
-        {
-            time += Time.deltaTime * SwapSpeed;
-            sel.transform.position = Vector3.Lerp(selTempPos, movTempPos, time);
-            mov.transform.position = Vector3.Lerp(movTempPos, selTempPos, time);
-
-            yield return null;
-        }
-
-
-
-
-    }
-
-    IEnumerator BackSwapBlockEffect()
-    {
-        Block sel = Block.Select.gameObject.GetComponent<Block>();
-        Block mov = Block.MoveTo.gameObject.GetComponent<Block>();
-
-        Vector3 selTempPos = mov.transform.position;
-        Vector3 movTempPos = sel.transform.position;
-
-
-        float time = 0;
-
-        yield return StartCoroutine(SwapBlockEffect());
-
-        while (time < 1)
-        {
-            time += Time.deltaTime * SwapSpeed;
-            sel.transform.position = Vector3.Lerp(selTempPos, movTempPos, time);
-            mov.transform.position = Vector3.Lerp(movTempPos, selTempPos, time);
-
-            yield return null;
-        }
-    }
-
+  
 
 
 }
