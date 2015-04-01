@@ -1,11 +1,14 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using BlockNS;
+using Random = UnityEngine.Random;
 
 
 public class BoardManager : MonoBehaviour
@@ -18,6 +21,8 @@ public class BoardManager : MonoBehaviour
 
     private Block[,] BoardGrid;
     private int[,] TileBoard;
+
+    public TextAsset levelData;
 
     public float SwapSpeed;
 
@@ -51,52 +56,47 @@ public class BoardManager : MonoBehaviour
         return set;
     }
 
-    void ReadLevelFromFile(string levelName)
-    {
-        string currLevel = Application.dataPath + @"/Levels/" + levelName + ".txt";
 
-      if(File.Exists(currLevel))
-      {
-         int[,] TileBoard = ReadTxtLevelData(currLevel);
-      }
-      else
-      {
-          Debug.Log("Не найден: "+ levelName);
-          
-      }
-    }
-
-    int[,] ReadTxtLevelData (string filePath)
+    int[,] ReadLevelArray(int levelNumber)
     {
-        
-		string[] lines = File.ReadAllLines(filePath);
-		int[,] bitMatrix  = new int[lines.Length, lines[0].Split(' ').Length];
-		for (int i = 0; i < lines.Length; i++)
-		{
-			string[] temp = lines[i].Split(' ');
-			for (int j = 0; j < temp.Length; j++)
-				bitMatrix[i, j] = System.Int32.Parse(temp[j]);
-		}
-        return bitMatrix;
-    }
 
-    void CreateTileGrid()
-    {
-        ReadTxtLevelData("level1");
-        
-		for (int row = 0; row < NumRows; row++)
+        string tempPath = Application.dataPath + @"\Levels\level" + levelNumber.ToString() + ".txt";
+
+        string[] lines = File.ReadAllLines(tempPath);
+
+        int[,] array = new int[lines.Length, lines[0].Split(' ').Length];
+
+        for (int i = 0; i < lines.Length; i++)
         {
-            for (int column = 0; column < NumColumns; column++)
+            string[] temp = lines[i].Split();
+            for (int j = 0; j < temp.Length; j++)
             {
-                if(TileBoard[column,row] == 1)
-                {
-                CreateTileAtColumn(column, row);
-                }
-
+                array[i, j] = int.Parse(temp[j]);
             }
         }
+        return array;
+    }
+
+  void CreateTileGrid()
+  {
+		var array = ReadLevelArray(1);
+      for (int i = 0; i < NumColumns; i++)
+      {
+          for (int j = 0; j < NumRows; j++)
+          {
+             if(array[j,i] ==1)
+              {
+                  CreateTileAtColumn(i,j);
+              }
+          }
+      }
+      
+       
 
     }
+
+    
+
 
     Block CreateBlockAtColumn(int column, int row, int blockType)
     {
@@ -129,7 +129,7 @@ public class BoardManager : MonoBehaviour
     {
 		
         CreateTileGrid();
-     //   CreateInitialBlock();
+     CreateInitialBlock();
 
         
     }
@@ -137,8 +137,8 @@ public class BoardManager : MonoBehaviour
 
     void Awake()
     {
-        TileBoard = new int[NumColumns,NumRows];
-        ReadLevelFromFile("level1");
+       
+      //  ReadLevelFromFile("level1");
         BoardGrid = new Block[NumColumns, NumRows];
         
     }
