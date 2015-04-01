@@ -159,5 +159,10 @@ namespace BlockNS
             }
 
         }
+
+		public static int RandomTypeValue(int maxValue)
+		{
+			return Random.Range(0, maxValue);
+		}
     }
 }
